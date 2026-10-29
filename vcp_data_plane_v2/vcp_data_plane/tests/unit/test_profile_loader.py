@@ -90,7 +90,7 @@ DC_PROFILE_YAML = textwrap.dedent("""\
 MINIMAL_WORKER_YAML = textwrap.dedent("""\
     worker_id: test-worker
     csms:
-      url: ws://localhost:9000/ocpp
+      url: ws://localhost:7000/ocpp
     redis:
       host: localhost
       port: 6379

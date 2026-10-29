@@ -21,6 +21,6 @@ RUN pip install --no-cache-dir -e ".[dev]"
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 
-EXPOSE 8000
+EXPOSE 9000
 
 CMD ["vcp-control", "run", "--reload"]
