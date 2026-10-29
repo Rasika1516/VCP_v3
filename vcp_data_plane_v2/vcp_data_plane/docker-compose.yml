@@ -36,7 +36,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"   # host port changed to avoid clashing with the control-plane's redis on 6379
     volumes:
       - redis_data:/data
     command: >
@@ -50,6 +50,17 @@ services:
       timeout: 3s
       retries: 5
 
+  # ── Mock CSMS (local dev target for workers, no real CSMS needed) ────────
+  mock-csms:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: vcp-data-plane:latest
+    restart: unless-stopped
+    command: ["python", "-m", "vcp_data_plane.devtools.mock_csms", "--port", "9000"]
+    ports:
+      - "9000:9000"
+
   # ── AC Worker (OCPP 1.6J, 100 VCPs) ───────────────────────────────────────
   worker-ac:
     build:
@@ -60,6 +71,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      mock-csms:
+        condition: service_started
     environment:
       <<: *worker-env
     volumes:
@@ -87,6 +100,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      mock-csms:
+        condition: service_started
     environment:
       <<: *worker-env
     volumes:

@@ -1,0 +1,64 @@
+# Worker config — DC fast-charger fleet (20 VCPs, OCPP 2.0.1) against the local mock CSMS.
+worker_id: worker-dc-01
+
+csms:
+  url: ws://mock-csms:9000/ocpp
+  auth:
+    type: none
+  connect_timeout_s: 10.0
+  ping_interval_s: 20.0
+  ping_timeout_s: 10.0
+  initial_backoff_s: 1.0
+  max_backoff_s: 60.0
+  backoff_multiplier: 2.0
+
+redis:
+  host: ${REDIS_HOST:-localhost}
+  port: 6379
+  db: 0
+  password: ${REDIS_PASSWORD:-}
+  ssl: false
+  command_stream_prefix: "vcp:commands:worker"
+  broadcast_stream: "vcp:commands:broadcast"
+  event_stream_prefix: "vcp:events:worker"
+  trace_stream_prefix: "vcp:trace"
+  state_hash_prefix: "vcp:state"
+  forward_traces_to_events: true
+  event_maxlen: 10000
+  worker_heartbeat_s: 15
+  registry_key: "vcp:registry"
+  consumer_group: "data-plane"
+  trace_maxlen: 10000
+  stream_block_ms: 1000
+
+profile_dir: configs/profiles
+
+fleet:
+  count: 20
+  id_prefix: "DC-"
+  id_start: 0
+  charge_point_id_prefix: "CP-DC-"
+  default_profile_id: generic_dc_ocpp201
+  group_id: group-dc
+
+vcps: []
+
+sharding:
+  shard_count: 1
+  shard_index: 0
+
+boot_jitter_ms: [0, 5000]
+
+control_api:
+  host: "0.0.0.0"
+  port: 8080
+  token: ${CONTROL_API_TOKEN:-}
+  require_auth: false
+
+metrics:
+  host: "0.0.0.0"
+  port: 9090
+  enabled: true
+
+default_ocpp_version: "2.0.1"
+log_level: "INFO"
