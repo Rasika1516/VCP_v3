@@ -71,7 +71,7 @@ COPY profiles/ /app/profiles/ 2>/dev/null || true
 RUN chown -R vcp:vcp /app
 USER vcp
 
-EXPOSE 8000
+EXPOSE 9000
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["vcp-control", "run"]

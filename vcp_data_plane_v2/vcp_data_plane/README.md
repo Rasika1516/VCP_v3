@@ -405,7 +405,7 @@ for very large fleets; `vcp:trace:{vcp_id}` is always written.
 For local runs and demos without a real CSMS:
 
 ```bash
-python -m vcp_data_plane.devtools.mock_csms --port 9000   # ws://localhost:9000/<cp_id>
+python -m vcp_data_plane.devtools.mock_csms --port 7000   # ws://localhost:9000/<cp_id>
 ```
 
 ---

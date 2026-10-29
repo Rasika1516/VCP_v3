@@ -11,7 +11,7 @@ import './Fleets.css'
 const EMPTY_FORM = {
   name: '',
   description: '',
-  csmsUrl: 'ws://localhost:9000/ocpp',
+  csmsUrl: 'ws://localhost:7000/ocpp',
   authType: 'none',
   username: '',
   password: '',
