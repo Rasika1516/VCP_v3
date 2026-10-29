@@ -1,0 +1,109 @@
+.fleet-loading {
+  color: var(--text-secondary);
+  padding: 20px;
+}
+
+.fleet-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.stat-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-card--accent {
+  border-color: var(--accent);
+  background: var(--accent-muted);
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.state-section {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.state-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 14px;
+}
+
+.state-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.state-bar-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+
+.state-bar-label {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  text-align: right;
+}
+
+.state-bar-track {
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.state-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.state-bar-fill--connected { background: #22c55e; }
+.state-bar-fill--disconnected { background: #6b7280; }
+.state-bar-fill--charging { background: #3b82f6; }
+.state-bar-fill--idle { background: #a78bfa; }
+.state-bar-fill--faulted { background: #ef4444; }
+.state-bar-fill--unknown { background: #94a3b8; }
+
+.state-bar-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}

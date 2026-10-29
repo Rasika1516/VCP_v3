@@ -1,0 +1,124 @@
+/* ============================================================
+   Shared component classes (loaded globally from main.jsx).
+   Previously some of these lived only in page stylesheets that
+   are lazy-loaded, so landing directly on another page lost them.
+   ============================================================ */
+
+.page { flex: 1; overflow-y: auto; padding-bottom: 40px; }
+.page-loading { padding: 40px 24px; color: var(--text-secondary); }
+.page-error { color: #ef4444; padding: 0 24px 14px; font-size: 13px; }
+
+.section-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0 0 16px; }
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary:hover:not(:disabled) { opacity: 0.9; }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--text-primary);
+  cursor: pointer; transition: border-color 0.15s, color 0.15s;
+}
+.btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-sm {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); cursor: pointer;
+}
+.btn-sm:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn-sm:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm--go { border-color: rgba(34,197,94,0.45); color: #22c55e; }
+.btn-sm--warn { border-color: rgba(245,158,11,0.45); color: #f59e0b; }
+
+.btn-danger-sm {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: 1px solid rgba(239,68,68,0.4); border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; font-weight: 600; color: #ef4444; cursor: pointer;
+}
+.btn-danger-sm:hover:not(:disabled) { background: rgba(239,68,68,0.08); }
+.btn-danger-sm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Forms */
+.form-label {
+  display: flex; flex-direction: column; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.form-hint { font-size: 11px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-tertiary); }
+.form-input, .form-textarea, .form-select {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; color: var(--text-primary); font-size: 13px; outline: none;
+  transition: border-color 0.15s; font-family: inherit; text-transform: none; letter-spacing: 0;
+}
+.form-textarea { font-family: var(--font-mono); resize: vertical; }
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row--3 { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 640px) { .form-row, .form-row--3 { grid-template-columns: 1fr; } }
+.form-error { font-size: 13px; color: #ef4444; background: rgba(239,68,68,0.08); padding: 8px 12px; border-radius: 8px; }
+.form-success { font-size: 13px; color: #22c55e; background: rgba(34,197,94,0.08); padding: 8px 12px; border-radius: 8px; }
+.form-info { font-size: 13px; color: var(--text-secondary); background: var(--surface-2); padding: 8px 12px; border-radius: 8px; }
+
+/* Tables */
+.data-table-wrap { padding: 0 24px; overflow-x: auto; }
+.data-table, .profiles-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th, .profiles-table th {
+  text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.data-table td, .profiles-table td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border-faint); color: var(--text-primary); vertical-align: middle;
+}
+.td-mono { font-family: var(--font-mono); font-size: 12px; }
+.td-sub { display: block; font-size: 11px; color: var(--text-tertiary); }
+.table-empty { color: var(--text-tertiary); text-align: center; padding: 30px !important; }
+
+/* Badges */
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.badge--green { background: rgba(34,197,94,0.12); color: #22c55e; }
+.badge--blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.badge--purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
+.badge--amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.badge--red { background: rgba(239,68,68,0.12); color: #ef4444; }
+.badge--gray { background: var(--surface-2); color: var(--text-tertiary); }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50;
+  display: flex; align-items: flex-start; justify-content: center; padding: 6vh 16px; overflow-y: auto;
+}
+.modal {
+  width: min(640px, 100%); background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.modal-title { font-size: 15px; font-weight: 700; }
+.modal-close { background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; }
+.modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); }
+.fieldset-title { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+/* Scope tabs (Scenarios, Fleet bulk command) */
+.scope-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.scope-tab {
+  padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; text-transform: none; letter-spacing: 0;
+}
+.scope-tab--active { background: var(--accent-muted); color: var(--accent); border-color: var(--accent); }
+
+/* Toolbar inputs (VCP list, Live Events) */
+.toolbar-search {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; color: var(--text-primary); font-size: 13px; width: 220px; outline: none;
+}
+.toolbar-search:focus { border-color: var(--accent); }
+.toolbar-count { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.form-input, .form-select, .form-textarea { min-width: 0; width: 100%; }

@@ -1,0 +1,69 @@
+# =============================================================================
+# Charger Profile — Generic AC Charger, OCPP 1.6J
+# =============================================================================
+# A typical 7.4 kW single-phase AC home/destination charger.
+# Mimics a broad class of wall-box products.
+# =============================================================================
+
+profile_id: generic_ac_ocpp16
+version: "1.0.0"
+
+vendor: "GenericEV"
+model: "WallBox-7k"
+firmware: "2.4.1"
+
+ocpp_version: "1.6J"
+
+# ---------------------------------------------------------------------------
+# Physical layout
+# ---------------------------------------------------------------------------
+evses:
+  - evse_id: 1
+    dc: false
+    connectors:
+      - connector_id: 1
+        connector_type: "Type2"       # IEC 62196-2 Type 2 (Mennekes)
+        max_power_kw: 7.4
+        max_voltage_v: 230.0
+        phase_count: 1
+        max_current_a: 32.0
+
+# ---------------------------------------------------------------------------
+# Protocol capabilities
+# ---------------------------------------------------------------------------
+capabilities:
+  remote_start: true
+  remote_stop: true
+  unlock_connector: true
+  change_availability: true
+  change_configuration: true
+  get_configuration: true
+  trigger_message: true
+  diagnostics: false
+  firmware_update: false
+  smart_charging: false
+  local_auth_list: false
+  reserve_now: false
+  data_transfer: true
+
+# ---------------------------------------------------------------------------
+# Default runtime behaviour (overridden by WorkerConfig.fleet.behavior_*)
+# ---------------------------------------------------------------------------
+behavior:
+  # How often to send Heartbeat (seconds)
+  heartbeat_interval_s: 300
+
+  # How often to send MeterValues during a transaction (seconds)
+  meter_value_interval_s: 60
+
+  # Ramp-up duration from 0 → max power (seconds)
+  charge_ramp_duration_s: 120.0
+
+  # Automatically stop a transaction after this many seconds (0 = never)
+  max_transaction_duration_s: 3600
+
+  # Idle time between back-to-back auto-transactions [min_s, max_s]
+  idle_between_transactions_s: [30.0, 120.0]
+
+  # Whether this charger participates in fault injection scenarios
+  fault_injection_enabled: true

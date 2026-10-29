@@ -1,0 +1,152 @@
+# =============================================================================
+# VCP Data Plane — Worker Configuration Example
+# =============================================================================
+# Copy this file to worker.yaml and adjust values for your environment.
+# Environment variables are expanded: $VAR or ${VAR} syntax.
+#
+# Run:  vcp-worker run configs/worker.yaml
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Worker identity
+# ---------------------------------------------------------------------------
+worker_id: worker-01          # Must be unique across all workers in the cluster
+
+# ---------------------------------------------------------------------------
+# CSMS (Central System) WebSocket endpoint
+# ---------------------------------------------------------------------------
+csms:
+  url: ws://csms.example.com:9000/ocpp   # wss:// for TLS
+
+  # Authentication config (nested under `auth`)
+  auth:
+    # type: none | basic | tls-cert
+    type: none
+
+    # HTTP Basic credentials (type: basic)
+    # username: ""
+    # password: ""
+
+    # TLS client certificate paths (type: tls-cert)
+    # ca_cert: ""           # Path to CA bundle PEM
+    # client_cert: ""       # Path to client certificate PEM
+    # client_key: ""        # Path to client private key PEM
+
+  # Connection tuning
+  connect_timeout_s: 10.0
+  ping_interval_s: 20.0
+  ping_timeout_s: 10.0
+
+  # Reconnect back-off: exponential, clamped at max_backoff_s
+  initial_backoff_s: 1.0
+  max_backoff_s: 60.0
+  backoff_multiplier: 2.0
+
+# ---------------------------------------------------------------------------
+# Redis — command bus, state cache, OCPP trace streams
+# ---------------------------------------------------------------------------
+redis:
+  host: ${REDIS_HOST:-localhost}
+  port: 6379
+  db: 0
+  password: ${REDIS_PASSWORD:-}     # Leave empty for no auth
+  ssl: false
+
+  # Stream key prefixes (should match control-plane configuration)
+  command_stream_prefix: "vcp:commands:worker"
+  broadcast_stream: "vcp:commands:broadcast"
+  event_stream_prefix: "vcp:events:worker"
+  trace_stream_prefix: "vcp:trace"
+  state_hash_prefix: "vcp:state"
+
+  # Contract v2 — events to the control plane (vcp:events:worker:{worker_id})
+  # Forward every OCPP frame as an ocpp_trace event (Live Events page).
+  # Set false for very large fleets; vcp:trace:{vcp_id} is always written.
+  forward_traces_to_events: true
+  event_maxlen: 10000
+  worker_heartbeat_s: 15          # worker_status heartbeat; 0 disables
+  registry_key: "vcp:registry"
+
+  # Consumer group for this worker
+  consumer_group: "data-plane"
+
+  # Maximum trace entries per VCP stream (older entries are trimmed)
+  trace_maxlen: 10000
+
+  # Blocking read timeout in milliseconds (0 = block forever)
+  stream_block_ms: 1000
+
+# ---------------------------------------------------------------------------
+# Profile directory (YAML files, one per brand/model)
+# ---------------------------------------------------------------------------
+profile_dir: configs/profiles
+
+# ---------------------------------------------------------------------------
+# VCP fleet — two ways to declare VCPs:
+#   1. fleet: auto-generate a range of VCPs (recommended for scale tests)
+#   2. vcps: explicit list (for heterogeneous or named deployments)
+#
+# fleet and vcps can both be set; fleet expands first, then vcps are merged.
+# ---------------------------------------------------------------------------
+
+# Option 1 — Auto-generate from a fleet block (single contiguous range)
+fleet:
+  count: 100                             # Number of VCPs to generate
+  id_prefix: "SIM-"                      # VCP IDs: SIM-00000 … SIM-00099
+  id_start: 0                            # First index (zero-based)
+  charge_point_id_prefix: "CP-"         # OCPP ChargePoint IDs: CP-00000 …
+  default_profile_id: generic_ac_ocpp16 # ChargerProfile to apply to all
+  group_id: group-a                      # Optional: group for group-scoped commands
+
+# Option 2 — Explicit VCPs (mixed fleet; each can use a different profile)
+vcps: []
+# vcps:
+#   - vcp_id: NAMED-CP-001
+#     charge_point_id: CP-NAMED-001
+#     profile_id: generic_ac_ocpp16
+#     ocpp_version: "1.6J"
+#     group_id: group-a
+#   - vcp_id: NAMED-DC-001
+#     charge_point_id: CP-DC-001
+#     profile_id: generic_dc_ocpp201
+#     ocpp_version: "2.0.1"
+
+# ---------------------------------------------------------------------------
+# Sharding / horizontal scaling
+# ---------------------------------------------------------------------------
+sharding:
+  # When deploying multiple workers, each claims a shard of the VCP fleet by
+  # consistent-hash shard index.  Set shard_count = number of workers and
+  # shard_index = this worker's zero-based index.
+  shard_count: 1
+  shard_index: 0
+
+# ---------------------------------------------------------------------------
+# Boot jitter — spread initial WebSocket connections across time
+# ---------------------------------------------------------------------------
+# Each VCP waits a random delay in [min_ms, max_ms] before its first connect.
+boot_jitter_ms: [0, 5000]
+
+# ---------------------------------------------------------------------------
+# Worker Control API  (FastAPI, used by control-plane gateway)
+# ---------------------------------------------------------------------------
+control_api:
+  host: "0.0.0.0"
+  port: 8080
+  # Bearer token for API authentication.  Set to empty string to disable auth.
+  token: ${CONTROL_API_TOKEN:-}
+  require_auth: false    # Set true in production
+
+# ---------------------------------------------------------------------------
+# Prometheus metrics scrape endpoint (separate port from control API)
+# ---------------------------------------------------------------------------
+metrics:
+  host: "0.0.0.0"
+  port: 9090
+  enabled: true
+
+# ---------------------------------------------------------------------------
+# Miscellaneous
+# ---------------------------------------------------------------------------
+default_ocpp_version: "1.6J"   # Fallback when not set in profile or VCP entry
+log_level: "INFO"

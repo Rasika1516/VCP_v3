@@ -1,0 +1,78 @@
+# =============================================================================
+# Charger Profile — Generic DC Fast Charger, OCPP 2.0.1
+# =============================================================================
+# A 150 kW DC fast charger with two CCS connectors.
+# Representative of roadside / highway charging stations.
+# =============================================================================
+
+profile_id: generic_dc_ocpp201
+version: "1.0.0"
+
+vendor: "GenericEV"
+model: "FastCharge-150"
+firmware: "3.1.0"
+
+ocpp_version: "2.0.1"
+
+# ---------------------------------------------------------------------------
+# Physical layout
+# ---------------------------------------------------------------------------
+evses:
+  - evse_id: 1
+    dc: true
+    connectors:
+      - connector_id: 1
+        connector_type: "CCS2"        # Combined Charging System (DC)
+        max_power_kw: 150.0
+        max_voltage_v: 920.0          # DC bus voltage
+        phase_count: 0                # DC — not applicable
+        max_current_a: 375.0          # 150 kW / 400 V ≈ 375 A
+
+  - evse_id: 2
+    dc: true
+    connectors:
+      - connector_id: 1
+        connector_type: "CCS2"
+        max_power_kw: 150.0
+        max_voltage_v: 920.0
+        phase_count: 0
+        max_current_a: 375.0
+
+# ---------------------------------------------------------------------------
+# Protocol capabilities
+# ---------------------------------------------------------------------------
+capabilities:
+  remote_start: true
+  remote_stop: true
+  unlock_connector: true
+  change_availability: true
+  change_configuration: true
+  get_configuration: false          # OCPP 2.0.1 uses GetVariables instead
+  trigger_message: true
+  diagnostics: false
+  firmware_update: true
+  smart_charging: true
+  local_auth_list: true
+  reserve_now: true
+  data_transfer: false
+
+# ---------------------------------------------------------------------------
+# Default runtime behaviour
+# ---------------------------------------------------------------------------
+behavior:
+  # Heartbeat every 5 minutes
+  heartbeat_interval_s: 300
+
+  # Send MeterValues every 30 s during fast-charge
+  meter_value_interval_s: 30
+
+  # DC fast chargers ramp up faster than AC (60 s to peak power)
+  charge_ramp_duration_s: 60.0
+
+  # Maximum simulated session length
+  max_transaction_duration_s: 1800
+
+  # Short idle between transactions [min_s, max_s] (DC chargers are high-turnover)
+  idle_between_transactions_s: [10.0, 30.0]
+
+  fault_injection_enabled: true

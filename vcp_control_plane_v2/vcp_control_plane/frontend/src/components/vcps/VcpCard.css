@@ -1,0 +1,84 @@
+.vcp-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+
+.vcp-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-muted);
+}
+
+.vcp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vcp-card-id {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: monospace;
+}
+
+.vcp-conn-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.vcp-conn-badge--connected { background: rgba(34,197,94,0.12); color: #22c55e; }
+.vcp-conn-badge--disconnected { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.vcp-conn-badge--faulted { background: rgba(239,68,68,0.12); color: #ef4444; }
+.vcp-conn-badge--connecting { background: rgba(245,158,11,0.12); color: #f59e0b; }
+
+.vcp-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.vcp-card-meta {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.vcp-card-val {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.vcp-state-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.vcp-state-chip--charging { background: rgba(59,130,246,0.12); color: #3b82f6; }
+.vcp-state-chip--idle { background: rgba(167,139,250,0.12); color: #a78bfa; }
+.vcp-state-chip--faulted { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+.vcp-card-footer {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}

@@ -1,0 +1,125 @@
+version: "3.9"
+
+# =============================================================================
+# VCP Fleet Simulator — Control & Management Plane
+# Stack: PostgreSQL + Redis + Backend API + Frontend dev server
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — VCP Registry
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: vcp-cp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vcp
+      POSTGRES_PASSWORD: vcp_secret
+      POSTGRES_DB: vcp_registry
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vcp -d vcp_registry"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis — Command Bus & Event Streams
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: vcp-cp-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Backend — FastAPI Control Plane
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: vcp-cp-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      VCP_CP_API_HOST: "0.0.0.0"
+      VCP_CP_API_PORT: "8000"
+      VCP_CP_API_TOKEN: "dev-token-change-me"
+      VCP_CP_REQUIRE_AUTH: "true"
+      VCP_CP_DATABASE_URL: "postgresql+asyncpg://vcp:vcp_secret@postgres:5432/vcp_registry"
+      VCP_CP_REDIS_HOST: redis
+      VCP_CP_REDIS_PORT: "6379"
+      VCP_CP_REDIS_SSL: "false"
+      VCP_CP_REDIS_DB: "0"
+      VCP_CP_COMMAND_STREAM_PREFIX: "vcp:commands:worker"
+      VCP_CP_BROADCAST_STREAM: "vcp:commands:broadcast"
+      VCP_CP_EVENT_STREAM_PREFIX: "vcp:events:worker"
+      VCP_CP_CONSUMER_GROUP: "cp-group"
+      VCP_CP_CONSUMER_NAME: "cp-consumer-1"
+      VCP_CP_WORKERS: ""                  # Optional: externally managed workers "id=url,…"
+      VCP_CP_WORKER_TOKEN: ""
+      # --- VCP Fleets deployed from the UI (docker launcher) ---
+      VCP_CP_DEFAULT_LAUNCHER: "docker"
+      VCP_CP_FLEET_CONFIG_DIR: "/app/var/fleets"
+      VCP_CP_DOCKER_HOST_FLEET_DIR: "${PWD}/var/fleets"   # same dir as seen by the Docker host
+      VCP_CP_DOCKER_IMAGE: "vcp-data-plane:latest"       # build from ../vcp_data_plane/docker/Dockerfile
+      VCP_CP_DOCKER_NETWORK: "vcp-net"                    # workers join this network
+      VCP_CP_WORKER_REDIS_HOST: redis
+      VCP_CP_FRONTEND_URL: "http://localhost:5173"
+      VCP_CP_LOG_LEVEL: "info"
+      VCP_CP_PROFILE_DIR: "/app/profiles"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src       # Live code reload in dev
+      - ./profiles:/app/profiles
+      - ./var/fleets:/app/var/fleets              # generated worker.yaml per fleet
+      - /var/run/docker.sock:/var/run/docker.sock # docker launcher
+
+  # ---------------------------------------------------------------------------
+  # Frontend — React + Vite dev server
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: node:20-alpine
+    container_name: vcp-cp-frontend
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+    environment:
+      VITE_PROXY_TARGET: "http://backend:8000"
+      VITE_API_BASE_URL: "http://localhost:8000/api/v1"
+      VITE_WS_BASE_URL: "ws://localhost:8000/api/v1"
+      VITE_API_TOKEN: "dev-token-change-me"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules     # Anonymous volume to preserve container node_modules
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: vcp-net     # fixed name so deployed worker containers can join it

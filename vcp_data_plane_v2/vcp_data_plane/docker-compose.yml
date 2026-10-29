@@ -1,0 +1,116 @@
+# =============================================================================
+# VCP Data Plane — Docker Compose (development / integration testing)
+# =============================================================================
+# Services:
+#   redis       — Redis 7, command bus + state cache + trace streams
+#   worker-ac   — VCP worker for 100 AC chargers (OCPP 1.6J)
+#   worker-dc   — VCP worker for 20 DC fast chargers (OCPP 2.0.1)
+#
+# Optional (profile: tools):
+#   redisinsight — Redis GUI (http://localhost:8001)
+#
+# Usage:
+#   docker compose up                          # start core services
+#   docker compose --profile tools up          # + RedisInsight
+#   docker compose up worker-ac --scale 3      # 3 AC workers (adjust sharding)
+# =============================================================================
+
+version: "3.9"
+
+# ---------------------------------------------------------------------------
+# Shared environment defaults
+# ---------------------------------------------------------------------------
+x-worker-env: &worker-env
+  REDIS_HOST: redis
+  REDIS_PASSWORD: ""
+  CONTROL_API_TOKEN: ""
+  PYTHONUNBUFFERED: "1"
+
+# ---------------------------------------------------------------------------
+# Services
+# ---------------------------------------------------------------------------
+services:
+
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── AC Worker (OCPP 1.6J, 100 VCPs) ───────────────────────────────────────
+  worker-ac:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: vcp-data-plane:latest
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *worker-env
+    volumes:
+      # Mount a custom worker config; falls back to embedded example
+      - ./configs/worker-ac.yaml:/app/configs/worker.yaml:ro
+      - ./configs/profiles:/app/configs/profiles:ro
+    ports:
+      - "8080:8080"    # Control API
+      - "9090:9090"    # Prometheus metrics
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  # ── DC Worker (OCPP 2.0.1, 20 VCPs) ───────────────────────────────────────
+  worker-dc:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: vcp-data-plane:latest
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *worker-env
+    volumes:
+      - ./configs/worker-dc.yaml:/app/configs/worker.yaml:ro
+      - ./configs/profiles:/app/configs/profiles:ro
+    ports:
+      - "8081:8080"    # Control API (host port offset to avoid collision)
+      - "9091:9090"    # Prometheus metrics
+
+  # ── RedisInsight (optional, profile: tools) ────────────────────────────────
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    profiles: ["tools"]
+    restart: unless-stopped
+    depends_on:
+      - redis
+    ports:
+      - "8001:8001"
+    volumes:
+      - redisinsight_data:/db
+
+# ---------------------------------------------------------------------------
+# Volumes
+# ---------------------------------------------------------------------------
+volumes:
+  redis_data:
+  redisinsight_data:
